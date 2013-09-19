@@ -1,0 +1,9 @@
+{
+  "name": "backbone-seelio",
+  "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/kyriesent/backbone-seelio"
+  },
+  "main": "backbone.js"
+}
