@@ -337,7 +337,8 @@
       current = this.attributes, prev = this._previousAttributes;
 
       // Check for changes of `id`.
-      if (this.idAttribute in attrs) this.id = attrs[this.idAttribute];
+      // if (this.idAttribute in attrs) this.id = attrs[this.idAttribute]; Seelio change to check for nested ids
+      if (checkNested(attrs, this.idAttribute.split('.'))) this.id = byString(attrs, this.idAttribute)
 
       // For each `set` attribute, update or delete the current value.
       for (attr in attrs) {
@@ -1464,7 +1465,8 @@
     navigate: function(fragment, options) {
       if (!History.started) return false;
       if (!options || options === true) options = {trigger: options};
-      fragment = this.getFragment(fragment || '');
+      // fragment = this.getFragment(fragment || '') // Seelio
+      fragment = this.getFragment(fragment || '', options.forcePushState, options.excludeQueryString);
       if (this.fragment === fragment) return;
       this.fragment = fragment;
       var url = this.root + fragment;
@@ -1564,6 +1566,37 @@
       if (error) error(model, resp, options);
       model.trigger('error', model, resp, options);
     };
+  };
+
+  // Helper function to accessing nested JavaScript objects with string key
+  // via. http://stackoverflow.com/a/6491621
+  // Seelio
+  var byString = function(object, stringKey) {
+    stringKey = stringKey.replace(/\[(\w+)\]/g, '.$1'); // convert indexes to properties
+    stringKey = stringKey.replace(/^\./, '');           // strip a leading dot
+    var a = stringKey.split('.');
+    while (a.length) {
+      var n = a.shift();
+      if (n in object) {
+        object = object[n];
+      } else {
+        return;
+      }
+    }
+    return object;
+  };
+
+  // Helper function to test the existence of multiple levels
+  // via. http://stackoverflow.com/a/2631198
+  // Seelio
+  var checkNested = function(obj, args) {
+    for (var i = 0; i < args.length; i++) {
+      if (!obj.hasOwnProperty(args[i])) {
+        return false;
+      }
+      obj = obj[args[i]];
+    }
+    return true;
   };
 
   return Backbone;
